@@ -1,8 +1,7 @@
-{   
-    "interval": 5,
-    "auto_play_game": true,
-    "game_point": {
-        "low": 100,
-        "high": 210
-    }
+{
+    "auto_task": true,
+    "auto_game": true,
+    "min_points": 250,
+    "max_points": 300,
+    "interval_minutes": 60
 }
