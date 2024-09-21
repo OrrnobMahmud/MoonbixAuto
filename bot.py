@@ -7,12 +7,20 @@ import random
 import asyncio
 from datetime import datetime
 from pathlib import Path
-from colorama import init, Fore
+from colorama import init, Fore, Style
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 # Initialize colorama
 init(autoreset=True)
+
+# Setup logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', filename='bot.log', filemode='w')
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+formatter = logging.Formatter('%(message)s')
+console.setFormatter(formatter)
+logging.getLogger('').addHandler(console)
 
 class Config:
     def __init__(self, auto_task, auto_game, min_points, max_points, interval_minutes):
@@ -43,7 +51,7 @@ class Binance:
         self.game_response = None
         self.game = None
         self.config = config
-        logging.basicConfig(level=logging.INFO)
+        logging.debug(f'Initialized Binance client for account index {account_index}')
 
     @staticmethod
     def get_random_android_user_agent():
@@ -68,12 +76,16 @@ class Binance:
         }.get(type, f"{account_prefix}{ip_prefix} {msg}")
         
         print(f"[{timestamp}] {log_message}")
+        logging.debug(f"{account_prefix}{ip_prefix} {msg}")  # Log to file
 
     def create_requests_session(self):
         session = requests.Session()
         if self.proxy:
             proxy = {"http": self.proxy, "https": self.proxy}
             session.proxies.update(proxy)
+            logging.debug(f'Using proxy {self.proxy}')
+        else:
+            logging.debug('No proxy used')
         retry = Retry(connect=3, backoff_factor=0.5)
         adapter = HTTPAdapter(max_retries=retry)
         session.mount('http://', adapter)
@@ -91,15 +103,18 @@ class Binance:
                 raise ValueError(f"Cannot check proxy IP. Status code: {response.status_code}")
         except Exception as e:
             raise ValueError(f"Error checking proxy IP: {str(e)}")
+        logging.debug(f'Proxy IP is {self.proxy_ip}')
 
-    def call_binance_api(self, query_string):
+    async def call_binance_api(self, query_string):
         access_token_url = "https://www.binance.com/bapi/growth/v1/friendly/growth-paas/third-party/access/accessToken"
         user_info_url = "https://www.binance.com/bapi/growth/v1/friendly/growth-paas/mini-app-activity/third-party/user/user-info"
         
         session = self.create_requests_session()
         
         try:
-            response = session.post(access_token_url, json={"queryString": query_string, "socialType": "telegram"})
+            response = await asyncio.to_thread(
+                session.post, access_token_url, json={"queryString": query_string, "socialType": "telegram"}
+            )
             access_token_response = response.json()
             if access_token_response.get('code') != "000000" or not access_token_response.get('success'):
                 raise ValueError(f"Failed to get access token: {access_token_response.get('message')}")
@@ -107,7 +122,9 @@ class Binance:
             access_token = access_token_response.get('data', {}).get('accessToken')
             session.headers.update({"X-Growth-Token": access_token})
             
-            response = session.post(user_info_url, json={"resourceId": 2056})
+            response = await asyncio.to_thread(
+                session.post, user_info_url, json={"resourceId": 2056}
+            )
             user_info_response = response.json()
             if user_info_response.get('code') != "000000" or not user_info_response.get('success'):
                 raise ValueError(f"Failed to get user info: {user_info_response.get('message')}")
@@ -117,9 +134,10 @@ class Binance:
             self.log(f"API call failed: {str(e)}", 'error')
             return None
     
-    def start_game(self, access_token):
+    async def start_game(self, access_token):
         try:
-            response = self.create_requests_session().post(
+            response = await asyncio.to_thread(
+                self.create_requests_session().post,
                 'https://www.binance.com/bapi/growth/v1/friendly/growth-paas/mini-app-activity/third-party/game/start',
                 json={"resourceId": 2056},
                 headers={"X-Growth-Token": access_token}
@@ -141,7 +159,10 @@ class Binance:
 
     async def game_data(self):
         try:
-            response = self.create_requests_session().post('https://vemid42929.pythonanywhere.com/api/v1/moonbix/play', json=self.game_response)
+            response = await asyncio.to_thread(
+                self.create_requests_session().post,
+                'https://vemid42929.pythonanywhere.com/api/v1/moonbix/play', json=self.game_response
+            )
 
             if response.json().get('message') == 'success':
                 self.game = response.json().get('game')
@@ -156,7 +177,8 @@ class Binance:
 
     async def complete_game(self, access_token):
         try:
-            response = self.create_requests_session().post(
+            response = await asyncio.to_thread(
+                self.create_requests_session().post,
                 'https://www.binance.com/bapi/growth/v1/friendly/growth-paas/mini-app-activity/third-party/game/complete',
                 json={
                     "resourceId": 2056, 
@@ -178,7 +200,8 @@ class Binance:
 
     async def get_task_list(self, access_token):
         try:
-            response = self.create_requests_session().post(
+            response = await asyncio.to_thread(
+                self.create_requests_session().post,
                 "https://www.binance.com/bapi/growth/v1/friendly/growth-paas/mini-app-activity/third-party/task/list",
                 json={"resourceId": 2056},
                 headers={"X-Growth-Token": access_token}
@@ -195,7 +218,8 @@ class Binance:
 
     async def complete_task(self, access_token, resource_id):
         try:
-            response = self.create_requests_session().post(
+            response = await asyncio.to_thread(
+                self.create_requests_session().post,
                 "https://www.binance.com/bapi/growth/v1/friendly/growth-paas/mini-app-activity/third-party/task/complete",
                 json={"resourceIdList": [resource_id], "referralCode": None},
                 headers={"X-Growth-Token": access_token}
@@ -224,7 +248,7 @@ class Binance:
                     self.log(f"Completed task: {resource_id}", 'success')
                 else:
                     self.log(f"Cannot complete task: {resource_id}", 'warning')
-                time.sleep(1)
+                await asyncio.sleep(1)
 
     async def play_game_if_tickets_available(self):
         try:
@@ -234,7 +258,7 @@ class Binance:
             self.log(f"Cannot check proxy IP: {str(e)}", 'error')
             return
 
-        result = self.call_binance_api(self.query_string)
+        result = await self.call_binance_api(self.query_string)
         if not result:
             return
 
@@ -279,6 +303,22 @@ async def run_worker(account_index, query_string, proxy, config):
 
 
 async def main():
+    # Clear the console
+    os.system('cls' if os.name == 'nt' else 'clear')
+    
+    # Displaying the banner
+    banner = f"""
+{Fore.GREEN}
+   ___                   _      __  __      _                 _ 
+  / _ \ _ _ _ _ _ _  ___| |__  |  \/  |__ _| |_  _ __ _  _ __| |
+ | (_) | '_| '_| ' \/ _ \ '_ \ | |\/| / _` | ' \| '  \ || / _` |
+  \___/|_| |_| |_||_\___/_.__/ |_|  |_\__,_|_||_|_|_|_\_,_\__,_|
+                                                                
+    Automated Binance Game Bot with Proxy and Task Management
+    {Style.RESET_ALL}
+"""
+    print(banner)
+    
     data_file = Path(__file__).parent / 'data.txt'
     proxy_file = Path(__file__).parent / 'proxy.txt'
     config_file = Path(__file__).parent / 'config.json'
@@ -294,11 +334,18 @@ async def main():
                 "interval_minutes": 60
             }, f, indent=4)
 
+    # Ensure proxy file exists (create if not)
+    if not proxy_file.exists():
+        with open(proxy_file, 'w') as f:
+            pass  # Creating an empty proxy file
+
     with open(data_file, 'r') as file:
         data = file.read().replace('\r', '').split('\n')
+        logging.debug(f'Read {len(data)} accounts from {data_file}')
 
     with open(proxy_file, 'r') as file:
         proxies = file.read().split('\n')
+        logging.debug(f'Read {len(proxies)} proxies from {proxy_file}')
 
     with open(config_file, 'r') as file:
         config_data = json.load(file)
@@ -309,6 +356,7 @@ async def main():
             max_points=config_data.get("max_points", 300),
             interval_minutes=config_data.get("interval_minutes", 60)
         )
+        logging.debug(f'Configuration: {config_data}')
 
     data = [line for line in data if line.strip()]
     proxies = [line for line in proxies if line.strip()]
@@ -329,6 +377,7 @@ async def main():
                 tasks = []
                 await asyncio.sleep(3)
 
+        logging.debug(f"All accounts processed. Waiting for {wait_time // 60} minutes before restarting...")
         print(f"All accounts processed. Waiting for {wait_time // 60} minutes before restarting...")
         await asyncio.sleep(wait_time)
 
