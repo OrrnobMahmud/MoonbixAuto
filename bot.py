@@ -10,17 +10,17 @@ from pathlib import Path
 from colorama import init, Fore
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from requests.sessions import Session
 
 # Initialize colorama
 init(autoreset=True)
 
 class Config:
-    def __init__(self, auto_task, auto_game, min_points, max_points):
+    def __init__(self, auto_task, auto_game, min_points, max_points, interval_minutes):
         self.auto_task = auto_task
         self.auto_game = auto_game
         self.min_points = min_points
         self.max_points = max_points
+        self.interval_minutes = interval_minutes
 
 class Binance:
     def __init__(self, account_index, query_string, config: Config, proxy=None):
@@ -291,6 +291,7 @@ async def main():
                 "auto_game": True,
                 "min_points": 100,
                 "max_points": 300,
+                "interval_minutes": 60
             }, f, indent=4)
 
     with open(data_file, 'r') as file:
@@ -305,14 +306,15 @@ async def main():
             auto_task=config_data.get("auto_task", True),
             auto_game=config_data.get("auto_game", True),
             min_points=config_data.get("min_points", 100),
-            max_points=config_data.get("max_points", 300)
+            max_points=config_data.get("max_points", 300),
+            interval_minutes=config_data.get("interval_minutes", 60)
         )
 
     data = [line for line in data if line.strip()]
     proxies = [line for line in proxies if line.strip()]
 
     max_threads = 10
-    wait_time = 60 * 60  # 1 hour in seconds
+    wait_time = config.interval_minutes * 60  # Convert minutes to seconds
 
     while True:
         tasks = []
