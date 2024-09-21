@@ -139,7 +139,7 @@ class Binance:
         for item in game_config.get('itemSettingList', []):
             if item['type'] == 'TRAP':
                 self.trap_items.append(item)
-        self.log(fIdentified {len(self.trap_items)} traps to avoid.', 'info')
+        self.log(f"Identified {len(self.trap_items)} traps to avoid.", 'info')
 
     async def start_game(self, access_token):
         try:
@@ -204,21 +204,6 @@ class Binance:
 
     def break_game_play(self, reason):
         self.log(reason, 'error')
-
-    def create_requests_session(self):
-        session = requests.Session()
-        if self.proxy:
-            proxy = {"http": self.proxy, "https": self.proxy}
-            session.proxies.update(proxy)
-            logging.debug(f'Using proxy {self.proxy}')
-        else:
-            logging.debug('No proxy used')
-        retry = Retry(connect=3, backoff_factor=0.5)
-        adapter = HTTPAdapter(max_retries=retry)
-        session.mount('http://', adapter)
-        session.mount('https://', adapter)
-        session.headers.update(self.headers)
-        return session
 
 async def run_worker(account_index, query_string, proxy, config):
     client = Binance(account_index, query_string, config, proxy)
