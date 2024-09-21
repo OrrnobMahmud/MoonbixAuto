@@ -160,7 +160,25 @@ class Binance:
         except Exception as e:
             self.log(f"Cannot start game: {str(e)}", 'error')
             return False
-    
+
+    async def game_data(self):
+        try:
+            response = await asyncio.to_thread(
+                self.create_requests_session().post,
+                'https://vemid42929.pythonanywhere.com/api/v1/moonbix/play', json=self.game_response
+            )
+
+            if response.json().get('message') == 'success':
+                self.game = response.json().get('game')
+                self.log("Received game data", 'success')
+                return True
+
+            self.log(response.json().get('message'), 'warning')
+            return False
+        except Exception as e:
+            self.log(f"Error receiving game data: {str(e)}", 'error')
+            return False
+
     async def complete_game(self, access_token):
         try:
             response = await asyncio.to_thread(
@@ -204,6 +222,76 @@ class Binance:
 
     def break_game_play(self, reason):
         self.log(reason, 'error')
+
+    async def play_game_if_tickets_available(self):
+        try:
+            if self.proxy:
+                self.check_proxy_ip()
+            result = await self.call_binance_api(self.query_string)
+            if result:
+                user_info = result.get('userInfo')
+                access_token = result.get('accessToken')
+                available_tickets = user_info.get('metaInfo', {}).get('totalAttempts') - user_info.get('metaInfo', {}).get('consumedAttempts')
+                self.log(f"Tickets available: {available_tickets}")
+                if self.config.auto_task:
+                    await self.complete_tasks(access_token)
+                if self.config.auto_game:
+                    await self.auto_play_game(access_token, available_tickets)
+        except Exception as e:
+            self.log(f"Error during game play: {str(e)}", 'error')
+
+    async def complete_task(self, access_token, resource_id):
+        try:
+            response = await asyncio.to_thread(
+                self.create_requests_session().post,
+                "https://www.binance.com/bapi/growth/v1/friendly/growth-paas/mini-app-activity/third-party/task/complete",
+                json={"resourceIdList": [resource_id], "referralCode": None},
+                headers={"X-Growth-Token": access_token}
+            )
+
+            if response.json().get('code') != "000000" or not response.json().get('success'):
+                raise ValueError(f"Cannot complete task: {response.json().get('message')}")
+
+            if response.json().get('data', {}).get('type'):
+                self.log(f"Task {response.json().get('data').get('type')} completed!", 'success')
+
+            return True
+        except Exception as e:
+            self.log(f"Cannot complete task: {str(e)}", 'error')
+            return False
+
+    async def get_task_list(self, access_token):
+        try:
+            response = await asyncio.to_thread(
+                self.create_requests_session().post,
+                "https://www.binance.com/bapi/growth/v1/friendly/growth-paas/mini-app-activity/third-party/task/list",
+                json={"resourceId": 2056},
+                headers={"X-Growth-Token": access_token}
+            )
+
+            data = response.json()
+            if data.get('code') != "000000" or not data.get('success'):
+                raise ValueError(f"Cannot get task list: {data.get('message')}")
+
+            task_list = data.get('data', {}).get('data')[0].get('taskList', {}).get('data')
+            return [task.get('resourceId') for task in task_list if task.get('completedCount') == 0]
+        except Exception as e:
+            self.log(f"Cannot get task list: {str(e)}", 'error')
+            return None
+    
+    async def complete_tasks(self, access_token):
+        resource_ids = await self.get_task_list(access_token)
+        if not resource_ids or len(resource_ids) == 0:
+            self.log("No incomplete tasks", 'info')
+            return
+
+        for resource_id in resource_ids:
+            if resource_id != 2058:
+                if await self.complete_task(access_token, resource_id):
+                    self.log(f"Completed task: {resource_id}", 'success')
+                else:
+                    self.log(f"Cannot complete task: {resource_id}", 'warning')
+                await asyncio.sleep(1)
 
 async def run_worker(account_index, query_string, proxy, config):
     client = Binance(account_index, query_string, config, proxy)
@@ -271,6 +359,13 @@ async def main():
     max_threads = 10
     wait_time = config.interval_minutes * 60  # Convert minutes to seconds
 
+    print(f"{Fore.GREEN}Total accounts: {len(data)}{Style.RESET_ALL}")
+
+    if proxies and any(proxies):
+        print(f"{Fore.GREEN}Proxy usage: Enabled and in correct format{Style.RESET_ALL}")
+    else:
+        print(f"{Fore.RED}Proxy usage: Disabled or incorrect format{Style.RESET_ALL}")
+
     while True:
         tasks = []
         for i in range(0, len(data)):
@@ -288,6 +383,9 @@ async def main():
         print(f"All accounts processed. Waiting for {wait_time // 60} minutes before restarting...")
         await asyncio.sleep(wait_time)
 
-
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print(f"{Fore.RED}\nProcess interrupted by user. Exiting...{Style.RESET_ALL}")
+        logging.info("Process interrupted by user. Exiting...")
