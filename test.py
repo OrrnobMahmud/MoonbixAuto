@@ -308,16 +308,17 @@ async def main():
     os.system('cls' if os.name == 'nt' else 'clear')
     
     # Displaying the banner
-    banner = f"""
-{Fore.GREEN}
+    banner = f"""{Fore.GREEN}
    ___                   _      __  __      _                 _ 
   / _ \ _ _ _ _ _ _  ___| |__  |  \/  |__ _| |_  _ __ _  _ __| |
  | (_) | '_| '_| ' \/ _ \ '_ \ | |\/| / _` | ' \| '  \ || / _` |
-  \___/|_| |_| |_||_\___/_.__/ |_|  |_\__,_|_||_|_|_|_\_,_\__,_|
+  \___/|_| |_| |_||_\___/_.__/ |_|  |_|\__,_|_||_|_|_|_\_,_\__,_|
                                                                 
-    Automated Binance Game Bot with Proxy and Task Management
-    {Style.RESET_ALL}
-"""
+    Auto Claim Bot For BinanceMoonBix - Orrnob's Drop Automation
+    Author  : Orrnob Mahmud
+    Github  : https://github.com/OrrnobMahmud
+    Telegram: https://t.me/verifiedcryptoairdops
+        {Style.RESET_ALL}"""
     print(banner)
     
     data_file = Path(__file__).parent / 'data.txt'
