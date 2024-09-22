@@ -73,7 +73,7 @@ class Binance:
 
     def log(self, msg, type='info'):
         timestamp = datetime.now().strftime('%H:%M:%S')
-        account_prefix = f"[Pemulung {self.account_index + 1}]"
+        account_prefix = f"[Account {self.account_index + 1}]"
         ip_prefix = f"[{self.proxy_ip}]"
         log_message = {
             'success': f"{account_prefix}{ip_prefix} {Fore.GREEN}{msg}",
