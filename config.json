@@ -3,5 +3,5 @@
     "auto_game": true,
     "min_points": 250,
     "max_points": 300,
-    "interval_minutes": 60
+    "interval_minutes": 10
 }
