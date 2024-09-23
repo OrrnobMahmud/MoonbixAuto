@@ -1,7 +1,1 @@
-aiofiles==22.1.0
-asyncio==3.4.3
-colorama==0.4.6
-httpx==0.24.0
-httpx-socks==0.5.1
-requests==2.31.0
-urllib3==1.26.16
+orrnob-drops-automation==0.1.6
