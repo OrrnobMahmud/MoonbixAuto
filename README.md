@@ -1,21 +1,19 @@
 # Binance MoonBix
 Follow This Installation Guide [https://t.me/verifiedcryptoairdops/167](https://t.me/verifiedcryptoairdops/167)
+# Register ?
+
+Click the following url to register : [Moonbix From Here Please ](https://t.me/Binance_Moonbix_bot/start?startApp=ref_1242349721&startapp=ref_1242349721&utm_medium=web_share_copy)
 
 # Warning
 
 "Users assume all responsibility and risk associated with the use of this bot/program script."
 
 ## Features
-- ✅ Daily Auto Claim
+- ❌ Daily Auto Claim
 - ✅ Proxy Support
 - ✅ Multi-Account Support
-- ✅ Auto Task Completion (details in [Config.json Overview](#configjson-overview))
-- ✅ Automated Game Play (see [Config.json Overview](#configjson-overview)
-
-
-# Register ?
-
-Click the following url to register : [https://t.me/Binance_Moonbix_bot/start?startApp=ref_1242349721&startapp=ref_1242349721&utm_medium=web_share_copy](https://t.me/Binance_Moonbix_bot/start?startApp=ref_1242349721&startapp=ref_1242349721&utm_medium=web_share_copy)
+- ❌ Auto Task Completion
+- ✅ Automated Game Play
 
 # How to Use
 
@@ -26,16 +24,6 @@ Here are some parameters to enable feature
 | parameter | description                                    |
 | --------- | ---------------------------------------------- |
 | --data    | set custom file data input (default: data.txt) |
-
-## About Config.json
-
-Here Config.json Description
-| key                | description                                                                                                                                       |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| interval           | value type is integer/real number <br> interval is delay between accounts                                                                         |
-| auto_complete_task | value type is bool (true/false), enable (true) to active auto complete task                                                                       |
-| auto_play_game     | value type is bool (true/false), enable (true) to active auto play game                                                                           |
-| game_point         | value type is integer/real number<br>low : minimum points earned when playing the game <br><br>high : maximal points earned when playing the game |
 
 ## About Proxy
 
