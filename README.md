@@ -1,13 +1,3 @@
-## SUPPORT THE ORIGINAL API DEVELOPER FOR THIS PROJECT
-```
-EQD5mxRgCuRNLxKxeOjG6r14iSroLF5FtomPnet-sgP5xNJb
-```
-
-![image](https://github.com/user-attachments/assets/1d268eca-0c95-4cce-a7ea-7f82014ad49d)
-
-
-
-
 # Binance MoonBix
 Follow This Installation Guide [https://t.me/verifiedcryptoairdops/167](https://t.me/verifiedcryptoairdops/167)
 # Register ?
