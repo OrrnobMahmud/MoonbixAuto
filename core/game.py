@@ -5,6 +5,7 @@ import threading
 from orrnob_drops_automation import base
 from core.headers import headers
 from core.info import get_info
+from core.combination import get_game_data
 
 
 def start_game(token, proxies=None):
@@ -23,25 +24,6 @@ def start_game(token, proxies=None):
         return data
     except:
         return None
-
-
-def play_game(start_game_data, proxies=None):
-    url = "https://moonbix-server-9r08ifrt4-scriptvips-projects.vercel.app/moonbix/api/v1/play"
-    payload = {"game_response": start_game_data}
-
-    try:
-        response = requests.get(
-            url=url,
-            json=payload,
-            proxies=proxies,
-            timeout=20,
-        )
-        data = response.json()
-        payload = data["game"]["payload"]
-        point = data["game"]["log"]
-        return payload, point
-    except:
-        return None, None
 
 
 def complete_game(token, payload, point, proxies=None):
