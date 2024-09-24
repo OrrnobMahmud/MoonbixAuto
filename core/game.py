@@ -1,6 +1,5 @@
 import requests
 import time
-import threading
 
 from orrnob_drops_automation import base
 from core.headers import headers
