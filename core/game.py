@@ -57,6 +57,19 @@ def loading_animation(seconds):
     print()  # Move to the next line after loading
 
 
+# Define the play_game function to fix the error
+def play_game(start_game_data, proxies=None):
+    # Retrieve game data from start_game_data or call an external function to get it
+    game_data = get_game_data(start_game_data, proxies=proxies)
+
+    if game_data:
+        payload = game_data["payload"]  # Adjust based on actual game data structure
+        point = game_data["point"]      # Adjust based on actual game data structure
+        return payload, point
+    else:
+        return None, None
+
+
 def process_play_game(token, proxies=None):
     while True:
         start_game_data = start_game(token=token, proxies=proxies)
@@ -95,3 +108,4 @@ def process_play_game(token, proxies=None):
             error_message = start_game_data["messageDetail"]
             base.log(f"{base.white}Auto Play Game: {base.red}Error - {error_message}")
             break
+
