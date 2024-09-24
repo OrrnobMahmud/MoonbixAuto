@@ -1,5 +1,6 @@
 import requests
 import time
+import threading
 
 from orrnob_drops_automation import base
 from core.headers import headers
@@ -21,7 +22,8 @@ def start_game(token, proxies=None):
         )
         data = response.json()
         return data
-    except:
+    except Exception as e:
+        base.log(f"{base.white}Error starting game: {e}")
         return None
 
 
@@ -44,7 +46,8 @@ def complete_game(token, payload, point, proxies=None):
         data = response.json()
         status = data["success"]
         return status
-    except:
+    except Exception as e:
+        base.log(f"{base.white}Error completing game: {e}")
         return None
 
 
@@ -56,36 +59,36 @@ def loading_animation(seconds):
     print()  # Move to the next line after loading
 
 
-# Use the working version of the play_game logic
-def play_game(start_game_data):
-    # No 'proxies' argument passed here, following the working version you provided
-    payload, point = get_game_data(game_response=start_game_data)
-    return payload, point
-
-
 def process_play_game(token, proxies=None):
     while True:
         start_game_data = start_game(token=token, proxies=proxies)
-        start_game_code = start_game_data["code"]
+        
+        if start_game_data is None:
+            base.log(f"{base.white}Auto Play Game: {base.red}Failed to start the game")
+            break
+
+        start_game_code = start_game_data.get("code")
 
         if start_game_code == "000000":
-            payload, point = play_game(start_game_data=start_game_data)
+            payload, point = get_game_data(game_response=start_game_data)
             if payload:
                 base.log(f"{base.yellow}Playing for 45 seconds...")
+
+                # Create and start the loading animation thread
                 loading_thread = threading.Thread(target=loading_animation, args=(45,))
                 loading_thread.start()
 
                 # Wait for the game to be played
-                time.sleep(45)
-                loading_thread.join()  # Wait for loading animation to finish
+                time.sleep(45)  # Simulating game play time
+                
+                # Wait for the loading animation to finish
+                loading_thread.join()
 
                 complete_game_status = complete_game(
                     token=token, payload=payload, point=point, proxies=proxies
                 )
                 if complete_game_status:
-                    base.log(
-                        f"{base.white}Auto Play Game: {base.green}Success | {base.blue}Collected {point} points"
-                    )
+                    base.log(f"{base.white}Auto Play Game: {base.green}Success")
                     get_info(token=token, proxies=proxies)
                     time.sleep(1)
                 else:
@@ -98,6 +101,6 @@ def process_play_game(token, proxies=None):
             base.log(f"{base.white}Auto Play Game: {base.red}No ticket left to play")
             break
         else:
-            error_message = start_game_data["messageDetail"]
+            error_message = start_game_data.get("messageDetail", "Unknown error")
             base.log(f"{base.white}Auto Play Game: {base.red}Error - {error_message}")
             break
