@@ -162,7 +162,7 @@ socks5://user:pass@127.0.0.1:6969
 3. Run docker container
    
    ```
-   docker run -it -v "./data.txt:/app/moonbixauto/data.txt" ghcr.io/OrrnobMahmud/BlumAuto:latest
+   docker run -it -v "./data.txt:/app/moonbixauto/data.txt" ghcr.io/orrnobmahmud/moonbixauto:latest
    ```
 
    or use compose:
