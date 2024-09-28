@@ -158,7 +158,7 @@ socks5://user:pass@127.0.0.1:6969
 ## Docker
 
 1. Make sure that docker is installed on your system.
-2. Edit data.txt, input you data token in data.txt, line for one data account, if you want add you second account add in new line!
+2. Edit `data.txt`, input you data token in `data.txt`, line for one data account, if you want add you second account add in new line!
 3. Run docker container
    
    ```
