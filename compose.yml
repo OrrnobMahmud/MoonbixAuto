@@ -1,0 +1,5 @@
+services:
+    app:
+      image: ghcr.io/OrrnobMahmud/BlumAuto:latest
+      volumes:
+        - ./data.txt:/app/moonbixauto/data.txt
