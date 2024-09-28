@@ -1,5 +1,5 @@
 services:
     app:
-      image: ghcr.io/OrrnobMahmud/BlumAuto:latest
+      image: ghcr.io/orrnobmahmud/moonbixauto
       volumes:
         - ./data.txt:/app/moonbixauto/data.txt
