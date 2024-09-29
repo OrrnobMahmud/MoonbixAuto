@@ -1,5 +1,5 @@
 # Binance MoonBix (Python Version 3.10 Required)
-Follow This Installation Guide [https://t.me/verifiedcryptoairdops/167](https://t.me/verifiedcryptoairdops/167)
+Follow This Installation Guide [Youtube](https://youtu.be/ab-OLXVNLlk?si=bY1gMTxImSfcMFZW)
 # Register ?
 
 Click the following url to register : [Moonbix From Here Please ](https://t.me/Binance_Moonbix_bot/start?startApp=ref_1242349721&startapp=ref_1242349721&utm_medium=web_share_copy)
